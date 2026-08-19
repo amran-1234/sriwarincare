@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - ลงทะเบียนนักเรียน (Sriwarin Care)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+    <style>body { font-family: 'Kanit', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 via-white to-pink-100 min-h-screen p-4 flex items-center justify-center">
+    
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-pink-100">
+        
+        <!-- ฝั่งซ้าย: แสดงภาพจากกล้อง -->
+        <div class="w-full md:w-1/2 bg-slate-900 p-6 flex flex-col items-center justify-center relative min-h-[350px]">
+            <video id="video" class="w-full max-w-sm rounded-lg shadow-lg hidden object-cover" autoplay muted playsinline></video>
+            <img id="previewImg" class="w-full max-w-sm rounded-lg shadow-lg hidden object-cover" src="" alt="Preview">
+
+            <div id="loader" class="text-white text-center absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 z-10">
+                <svg class="animate-spin h-10 w-10 text-pink-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p id="statusText" class="text-lg font-medium text-blue-200">กำลังโหลดระบบ AI...</p>
+            </div>
+        </div>
+
+        <!-- ฝั่งขวา: ฟอร์มกรอกข้อมูล -->
+        <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-500 mb-6 text-center md:text-left">
+                ลงทะเบียนนักเรียน
+            </h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รหัสนักเรียน</label>
+                    <input type="text" id="student_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none transition" placeholder="เช่น 6901">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-สกุล</label>
+                    <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition" placeholder="เช่น สมชาย รักดี">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ห้องเรียน</label>
+                        <input type="text" id="classroom" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-pink-400 outline-none transition" placeholder="เช่น ม.4/1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ครูที่ปรึกษา</label>
+                        <input type="text" id="advisor" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition" placeholder="เช่น ครูสมศรี">
+                    </div>
+                </div>
+
+                <div class="pt-4 space-y-3">
+                    <button id="captureBtn" class="w-full bg-gradient-to-r from-blue-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
+                        ✨ สแกนใบหน้า & บันทึกข้อมูล
+                    </button>
+                    
+                    <div class="relative flex items-center py-2">
+                        <div class="flex-grow border-t border-gray-200"></div>
+                        <span class="flex-shrink-0 mx-4 text-gray-400 text-sm">หรือหากใช้งานกล้องไม่ได้</span>
+                        <div class="flex-grow border-t border-gray-200"></div>
+                    </div>
+
+                    <label class="cursor-pointer w-full flex justify-center items-center px-4 py-2.5 border-2 border-dashed border-pink-300 rounded-lg hover:bg-pink-50 text-pink-600 font-medium transition">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        เลือกรูปภาพ / ถ่ายจากมือถือ
+                        <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🚨 ลิงก์ API จาก Google Apps Script (ใส่เตรียมไว้ให้แล้วครับ)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXz87dL0hHBBkWFvKVI8IJPu9Lnew9L8UDsiVoOD2XeCHmBuFCDZZVVnUf3D8h8WfCqg/exec';
+
+        const video = document.getElementById('video');
+        const previewImg = document.getElementById('previewImg');
+        const fileInput = document.getElementById('fileInput');
+        const statusText = document.getElementById('statusText');
+        const loader = document.getElementById('loader');
+        const captureBtn = document.getElementById('captureBtn');
+        
+        let useVideo = false; 
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+                await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+                showLoader(false);
+                startCamera();
+            } catch (error) {
+                showLoader(false);
+                alert("โหลดโมเดล AI ไม่สำเร็จ โปรดตรวจสอบสัญญาณอินเทอร์เน็ต");
+            }
+        });
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                previewImg.classList.add('hidden');
+                useVideo = true;
+            } catch (err) {
+                console.error("Camera Error:", err);
+                alert("ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบสิทธิ์การใช้งานกล้องในเบราว์เซอร์ครับ");
+            }
+        }
+
+        function showLoader(show, text = "") {
+            loader.style.display = show ? 'flex' : 'none';
+            if(text) statusText.innerText = text;
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    previewImg.classList.remove('hidden');
+                    video.classList.add('hidden');
+                    useVideo = false; 
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        captureBtn.addEventListener('click', async () => {
+            const studentId = document.getElementById('student_id').value;
+            const name = document.getElementById('name').value;
+            const classroom = document.getElementById('classroom').value;
+            const advisor = document.getElementById('advisor').value;
+
+            if(!studentId || !name || !classroom || !advisor) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วนทุกช่องครับ');
+                return;
+            }
+
+            const imageSource = useVideo ? video : (previewImg.src && !previewImg.classList.contains('hidden') ? previewImg : null);
+            if (!imageSource) {
+                alert('กรุณาเปิดกล้อง หรือ อัปโหลดรูปภาพใบหน้านักเรียนก่อนครับ');
+                return;
+            }
+
+            showLoader(true, "กำลังวิเคราะห์ใบหน้า...");
+
+            try {
+                const detections = await faceapi.detectSingleFace(imageSource).withFaceLandmarks().withFaceDescriptor();
+
+                if (!detections) {
+                    showLoader(false);
+                    alert("ไม่พบใบหน้า! กรุณาถ่ายหรืออัปโหลดรูปที่เห็นหน้าตรงชัดเจนครับ");
+                    return;
+                }
+
+                showLoader(true, "วิเคราะห์สำเร็จ! กำลังส่งข้อมูลไปยังฐานข้อมูล...");
+
+                const payload = {
+                    student_id: studentId,
+                    name: name,
+                    classroom: classroom,
+                    advisor: advisor,
+                    face_descriptor: JSON.stringify(Array.from(detections.descriptor))
+                };
+
+                // ใช้ Fetch API ส่งข้อมูลข้ามโดเมนไปยัง Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: {
+                        // ส่งเป็น text/plain เพื่อป้องกันการติดปัญหา CORS ของเบราว์เซอร์
+                        'Content-Type': 'text/plain;charset=utf-8', 
+                    }
+                });
+
+                const result = await response.json();
+
+                showLoader(false);
+                if(result.status === "success") {
+                    alert("✅ บันทึกข้อมูลนักเรียนสำเร็จเรียบร้อย!");
+                    document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+                    if(!useVideo) {
+                        previewImg.src = '';
+                        previewImg.classList.add('hidden');
+                    }
+                } else {
+                    alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: " + result.message);
+                }
+
+            } catch (error) {
+                showLoader(false);
+                console.error("Error:", error);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ หรือวิเคราะห์ใบหน้าล้มเหลว");
+            }
+        });
+    </script>
+</body>
+</html>
