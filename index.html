@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sriwarin Care - ระบบสแกนใบหน้า</title>
+    <!-- โหลดฟอนต์ Kanit จาก Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- โหลด Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลด Face API -->
     <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
     <style>body { font-family: 'Kanit', sans-serif; }</style>
 </head>
@@ -16,6 +19,7 @@
         <!-- ฝั่งซ้าย: กล้อง -->
         <div class="w-full md:w-1/2 bg-slate-900 p-6 flex flex-col items-center justify-center relative min-h-[350px]">
             <video id="video" class="w-full max-w-sm rounded-lg shadow-lg hidden object-cover" autoplay muted playsinline></video>
+            
             <div id="loader" class="text-white text-center absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 z-10">
                 <svg class="animate-spin h-10 w-10 text-pink-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -34,7 +38,7 @@
             </div>
 
             <!-- ============================== -->
-            <!-- ฟอร์มสำหรับนักเรียน (Student) -->
+            <!-- 1. ฟอร์มสำหรับนักเรียน (Student) -->
             <!-- ============================== -->
             <div id="formStudent" class="flex-1 flex flex-col justify-center">
                 
@@ -67,27 +71,32 @@
                     <h2 class="text-xl font-bold text-blue-600">สวัสดี <span id="displayName" class="text-pink-500"></span></h2>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">วันนี้คุณรู้สึกอย่างไรบ้าง? 💬</label>
-                        <textarea id="studentFeeling" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none resize-none" placeholder="เช่น วันนี้รู้สึกสดชื่น หรือ ช่วงนี้เครียดเรื่องสอบ..."></textarea>
+                        <textarea id="studentFeeling" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none resize-none" placeholder="เช่น วันนี้รู้สึกสดชื่นพร้อมเรียนมากครับ หรือ ช่วงนี้เครียดเรื่องสอบ..."></textarea>
                     </div>
                     <button id="btnSubmitFeeling" class="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 rounded-lg shadow-md transition">
                         🚀 ส่งความรู้สึก
                     </button>
                 </div>
-
             </div>
 
             <!-- ============================== -->
-            <!-- ฟอร์มสำหรับ Admin (ลงทะเบียน) -->
+            <!-- 2. ฟอร์มสำหรับ Admin (ลงทะเบียน) -->
             <!-- ============================== -->
             <div id="formAdmin" class="hidden flex-1 flex flex-col justify-center space-y-4">
                 <h2 class="text-2xl font-bold text-pink-600 text-center">ลงทะเบียนใบหน้าใหม่</h2>
-                <div><input type="text" id="admin_student_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="รหัสนักเรียน (เช่น 6901)"></div>
-                <div><input type="text" id="admin_name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ชื่อ-สกุล"></div>
+                
+                <div>
+                    <input type="text" id="admin_student_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="รหัสนักเรียน (เช่น 6901)">
+                </div>
+                <div>
+                    <input type="text" id="admin_name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ชื่อ-สกุล">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <input type="text" id="admin_classroom" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ห้องเรียน">
                     <input type="text" id="admin_advisor" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ครูที่ปรึกษา">
                 </div>
-                <button id="btnRegister" class="w-full mt-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold py-3 px-4 rounded-lg shadow-md">
+                
+                <button id="btnRegister" class="w-full mt-4 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
                     ✨ บันทึกใบหน้าลงระบบ
                 </button>
             </div>
@@ -96,32 +105,62 @@
     </div>
 
     <script>
-        // 🚨 1. นำลิงก์ Web App URL ของคุณมาวางตรงนี้
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXz87dL0hHBBkWFvKVI8IJPu9Lnew9L8UDsiVoOD2XeCHmBuFCDZZVVnUf3D8h8WfCqg/exec';
-        
-        // 🚨 2. นำลิงก์ Webhook ของ n8n มาวางตรงนี้
-        const N8N_WEBHOOK_URL = 'ใส่_ลิงก์_Webhook_ของ_n8n_ตรงนี้';
+        // ---------------------------------------------------------
+        // การตั้งค่า API URL (อัปเดตใหม่ล่าสุด)
+        // ---------------------------------------------------------
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbza-DflqA01nvCmNESa-bjFgV316ymaX08URfekBHq5TejA-RYFCH3VCfgnMhG7TuTpwQ/exec';
+        const N8N_WEBHOOK_URL = 'https://amran1234.app.n8n.cloud/webhook/7ee1280d-f328-423b-bd43-6ff02ba3d01a';
+        const ADMIN_PIN = '999999'; // ตั้งค่ารหัส PIN ตรงนี้
 
-        let faceMatcher = null; // ตัวเก็บข้อมูล AI สำหรับเทียบใบหน้า
-        let currentStudentData = null; // เก็บข้อมูลนักเรียนที่สแกนเจอชั่วคราว
+        let faceMatcher = null; 
+        let currentStudentData = null; 
 
         const video = document.getElementById('video');
         const loader = document.getElementById('loader');
         const statusText = document.getElementById('statusText');
 
-        // การสลับโหมด (Tab)
-        document.getElementById('tabStudent').addEventListener('click', () => {
+        // ---------------------------------------------------------
+        // การจัดการ UI และสลับโหมด
+        // ---------------------------------------------------------
+        const tabStudent = document.getElementById('tabStudent');
+        const tabAdmin = document.getElementById('tabAdmin');
+
+        tabStudent.addEventListener('click', () => {
+            if (!document.getElementById('formStudent').classList.contains('hidden')) return;
+
+            tabStudent.classList.replace('text-gray-500', 'text-blue-600');
+            tabStudent.classList.replace('hover:text-gray-700', 'shadow');
+            tabStudent.classList.add('bg-white');
+            
+            tabAdmin.classList.replace('text-blue-600', 'text-gray-500');
+            tabAdmin.classList.replace('shadow', 'hover:text-gray-700');
+            tabAdmin.classList.remove('bg-white');
+
             document.getElementById('formStudent').classList.remove('hidden');
             document.getElementById('formAdmin').classList.add('hidden');
-            document.getElementById('tabStudent').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition";
-            document.getElementById('tabAdmin').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition";
             resetStudentSteps();
         });
-        document.getElementById('tabAdmin').addEventListener('click', () => {
-            document.getElementById('formAdmin').classList.remove('hidden');
-            document.getElementById('formStudent').classList.add('hidden');
-            document.getElementById('tabAdmin').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition";
-            document.getElementById('tabStudent').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition";
+
+        tabAdmin.addEventListener('click', () => {
+            if (!document.getElementById('formAdmin').classList.contains('hidden')) return;
+
+            // ถามรหัส PIN
+            const pin = prompt("🔒 กรุณาใส่รหัส PIN 6 หลักเพื่อเข้าสู่โหมดผู้ดูแลระบบ:");
+            
+            if (pin === ADMIN_PIN) {
+                tabAdmin.classList.replace('text-gray-500', 'text-blue-600');
+                tabAdmin.classList.replace('hover:text-gray-700', 'shadow');
+                tabAdmin.classList.add('bg-white');
+                
+                tabStudent.classList.replace('text-blue-600', 'text-gray-500');
+                tabStudent.classList.replace('shadow', 'hover:text-gray-700');
+                tabStudent.classList.remove('bg-white');
+
+                document.getElementById('formAdmin').classList.remove('hidden');
+                document.getElementById('formStudent').classList.add('hidden');
+            } else if (pin !== null) {
+                alert("❌ รหัส PIN ไม่ถูกต้อง!");
+            }
         });
 
         function showLoader(show, text = "") {
@@ -137,6 +176,9 @@
             currentStudentData = null;
         }
 
+        // ---------------------------------------------------------
+        // การโหลดระบบกล้องและ AI
+        // ---------------------------------------------------------
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 // 1. โหลดโมเดล AI
@@ -147,25 +189,31 @@
 
                 // 2. ดึงฐานข้อมูลนักเรียนจาก Google Sheets เพื่อเตรียมเปรียบเทียบ
                 statusText.innerText = "กำลังซิงค์ฐานข้อมูลนักเรียน...";
-                const response = await fetch(SCRIPT_URL);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
                 const result = await response.json();
 
-                if(result.status === "success" && result.data.length > 0) {
+                if(result.status === "success" && result.data && result.data.length > 0) {
                     const labeledDescriptors = result.data.map(student => {
                         return new faceapi.LabeledFaceDescriptors(
-                            JSON.stringify(student), // เก็บข้อมูลเป็น JSON ผูกไว้กับใบหน้า
+                            JSON.stringify(student), 
                             [new Float32Array(student.face_descriptor)]
                         );
                     });
-                    // สร้างระบบเปรียบเทียบ (ความแม่นยำ 0.5 ยิ่งน้อยยิ่งเข้มงวด)
+                    // สร้างระบบเปรียบเทียบ (ความแม่นยำ 0.5)
                     faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.5);
                 }
 
                 showLoader(false);
                 startCamera();
             } catch (error) {
-                alert("เกิดข้อผิดพลาดในการเริ่มต้นระบบ (เช็คอินเทอร์เน็ต)");
+                showLoader(false);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล กรุณารีเฟรชหน้าเว็บ");
                 console.error(error);
+                startCamera();
             }
         });
 
@@ -179,18 +227,16 @@
             }
         }
 
-        // ==========================================
-        // ระบบนักเรียน (สแกน -> ยืนยัน -> ส่งข้อมูล)
-        // ==========================================
-
-        // Step 1: สแกนใบหน้า
+        // ---------------------------------------------------------
+        // โหมดนักเรียน (สแกน -> ยืนยัน -> ส่งข้อมูล)
+        // ---------------------------------------------------------
         document.getElementById('btnScanFace').addEventListener('click', async () => {
             if(!faceMatcher) {
-                alert("ฐานข้อมูลว่างเปล่า กรุณาให้ Admin ลงทะเบียนนักเรียนก่อนครับ");
+                alert("ฐานข้อมูลยังว่างเปล่า หรือดึงข้อมูลไม่สำเร็จ กรุณาติดต่อ Admin ครับ");
                 return;
             }
 
-            showLoader(true, "กำลังค้นหาและเปรียบเทียบใบหน้า...");
+            showLoader(true, "กำลังวิเคราะห์ใบหน้า...");
             const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
 
             if(!detections) {
@@ -199,7 +245,6 @@
                 return;
             }
 
-            // นำใบหน้าไปเปรียบเทียบกับฐานข้อมูล
             const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
 
             if(bestMatch.label === "unknown") {
@@ -208,10 +253,8 @@
                 return;
             }
 
-            // แปลงข้อมูลที่ซ่อนไว้กลับมาใช้งาน
             currentStudentData = JSON.parse(bestMatch.label);
             
-            // แสดงข้อมูลใน Step 2
             document.getElementById('foundId').innerText = currentStudentData.student_id;
             document.getElementById('foundName').innerText = currentStudentData.name;
             document.getElementById('foundClass').innerText = currentStudentData.classroom;
@@ -219,12 +262,10 @@
             
             showLoader(false);
             
-            // เปลี่ยนหน้าจอไป Step 2
             document.getElementById('studentStep1').classList.add('hidden');
             document.getElementById('studentStep2').classList.remove('hidden');
         });
 
-        // Step 2: ยกเลิก / ยืนยัน
         document.getElementById('btnCancel').addEventListener('click', resetStudentSteps);
         
         document.getElementById('btnConfirm').addEventListener('click', () => {
@@ -233,17 +274,10 @@
             document.getElementById('displayName').innerText = currentStudentData.name;
         });
 
-        // Step 3: ส่งข้อมูลความรู้สึกไปที่ n8n
         document.getElementById('btnSubmitFeeling').addEventListener('click', async () => {
-            const feeling = document.getElementById('studentFeeling').value;
+            const feeling = document.getElementById('studentFeeling').value.trim();
             if(!feeling) {
                 alert("กรุณาพิมพ์ความรู้สึกของวันนี้ก่อนส่งครับ");
-                return;
-            }
-
-            if(N8N_WEBHOOK_URL.includes("ใส่_ลิงก์")) {
-                alert("กำลังจำลองการส่งข้อมูล (เนื่องจากยังไม่ได้ใส่ลิงก์ n8n)\nข้อมูลพร้อมส่งไปประเมินความเสี่ยงแล้วครับ!");
-                resetStudentSteps();
                 return;
             }
 
@@ -258,7 +292,6 @@
             };
 
             try {
-                // ยิงข้อมูลเข้า n8n Webhook
                 await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -266,29 +299,29 @@
                 });
                 
                 showLoader(false);
-                alert("ส่งข้อมูลเรียบร้อยแล้ว! ขอให้วันนี้เป็นวันที่ดีนะ 🌟");
-                resetStudentSteps(); // กลับไปหน้าแรกเพื่อรอนักเรียนคนถัดไป
+                alert("✅ ส่งข้อมูลเรียบร้อยแล้ว! ขอให้วันนี้เป็นวันที่ดีครับ");
+                resetStudentSteps(); 
             } catch (err) {
                 showLoader(false);
                 alert("ส่งข้อมูลไม่สำเร็จ กรุณาลองอีกครั้งครับ");
             }
         });
 
-        // ==========================================
-        // ระบบ Admin (บันทึกข้อมูล)
-        // ==========================================
+        // ---------------------------------------------------------
+        // โหมด Admin (ลงทะเบียนใบหน้า)
+        // ---------------------------------------------------------
         document.getElementById('btnRegister').addEventListener('click', async () => {
-            const studentId = document.getElementById('admin_student_id').value;
-            const name = document.getElementById('admin_name').value;
-            const classroom = document.getElementById('admin_classroom').value;
-            const advisor = document.getElementById('admin_advisor').value;
+            const studentId = document.getElementById('admin_student_id').value.trim();
+            const name = document.getElementById('admin_name').value.trim();
+            const classroom = document.getElementById('admin_classroom').value.trim();
+            const advisor = document.getElementById('admin_advisor').value.trim();
 
             if(!studentId || !name || !classroom || !advisor) {
                 alert('กรุณากรอกข้อมูลให้ครบถ้วน');
                 return;
             }
 
-            showLoader(true, "กำลังวิเคราะห์โครงสร้างใบหน้า...");
+            showLoader(true, "กำลังสแกนและวิเคราะห์ใบหน้า...");
             const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
 
             if (!detections) {
@@ -319,7 +352,7 @@
                 showLoader(false);
 
                 if(result.status === "success") {
-                    alert("✅ บันทึกใบหน้าสำเร็จ! แนะนำให้รีเฟรชหน้าเว็บ 1 ครั้งเพื่อให้ระบบดึงข้อมูลใหม่ไปใช้งาน");
+                    alert("✅ บันทึกใบหน้าสำเร็จ!\n(กรุณารีเฟรชหน้าเว็บ 1 ครั้งเพื่อให้ระบบจดจำใบหน้าใหม่)");
                     document.querySelectorAll('#formAdmin input').forEach(input => input.value = '');
                 } else {
                     alert("เกิดข้อผิดพลาด: " + result.message);
