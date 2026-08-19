@@ -106,11 +106,11 @@
 
     <script>
         // ---------------------------------------------------------
-        // การตั้งค่า API URL (อัปเดตใหม่ล่าสุด)
+        // การตั้งค่า API URL
         // ---------------------------------------------------------
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFNgxjr8sTRfFtdlwHKPR-pbsxHTwrw_sXtPNa9GKk-3aEIVvU7JARu3ljKg0nESKzQg/exec';
         const N8N_WEBHOOK_URL = 'https://amran1234.app.n8n.cloud/webhook/7ee1280d-f328-423b-bd43-6ff02ba3d01a';
-        const ADMIN_PIN = '999999'; // ตั้งค่ารหัส PIN ตรงนี้
+        const ADMIN_PIN = '999999';
 
         let faceMatcher = null; 
         let currentStudentData = null; 
@@ -144,7 +144,6 @@
         tabAdmin.addEventListener('click', () => {
             if (!document.getElementById('formAdmin').classList.contains('hidden')) return;
 
-            // ถามรหัส PIN
             const pin = prompt("🔒 กรุณาใส่รหัส PIN 6 หลักเพื่อเข้าสู่โหมดผู้ดูแลระบบ:");
             
             if (pin === ADMIN_PIN) {
@@ -341,26 +340,25 @@
                 face_descriptor: JSON.stringify(Array.from(detections.descriptor))
             };
 
-              try {
-                const response = await fetch(SCRIPT_URL, {
+            try {
+                // ส่งข้อมูลในรูปแบบ Form Data เพื่อแก้ปัญหาถูก Google ปฏิเสธ (CORS)
+                const formData = new URLSearchParams();
+                formData.append('data', JSON.stringify(payload));
+
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    redirect: 'follow' // <--- เพิ่มบรรทัดนี้เข้าไปครับ
+                    body: formData,
+                    mode: 'no-cors' 
                 });
 
-                const result = await response.json();
                 showLoader(false);
-
-                if(result.status === "success") {
-                    alert("✅ บันทึกใบหน้าสำเร็จ!\n(กรุณารีเฟรชหน้าเว็บ 1 ครั้งเพื่อให้ระบบจดจำใบหน้าใหม่)");
-                    document.querySelectorAll('#formAdmin input').forEach(input => input.value = '');
-                } else {
-                    alert("เกิดข้อผิดพลาด: " + result.message);
-                }
+                alert("✅ บันทึกใบหน้าลงฐานข้อมูลสำเร็จ!\n(กรุณารีเฟรชหน้าเว็บ 1 ครั้งเพื่อให้ระบบดึงข้อมูลใหม่)");
+                document.querySelectorAll('#formAdmin input').forEach(input => input.value = '');
+                
             } catch (error) {
                 showLoader(false);
-                alert("เชื่อมต่อฐานข้อมูลล้มเหลว");
+                alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาตรวจสอบอินเทอร์เน็ต");
+                console.error(error);
             }
         });
     </script>
