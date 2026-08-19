@@ -341,11 +341,12 @@
                 face_descriptor: JSON.stringify(Array.from(detections.descriptor))
             };
 
-            try {
+              try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    redirect: 'follow' // <--- เพิ่มบรรทัดนี้เข้าไปครับ
                 });
 
                 const result = await response.json();
