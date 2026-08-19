@@ -13,10 +13,9 @@
     
     <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-pink-100">
         
-        <!-- ฝั่งซ้าย: แสดงภาพจากกล้อง (ใช้ร่วมกันทั้ง 2 โหมด) -->
+        <!-- ฝั่งซ้าย: กล้อง -->
         <div class="w-full md:w-1/2 bg-slate-900 p-6 flex flex-col items-center justify-center relative min-h-[350px]">
             <video id="video" class="w-full max-w-sm rounded-lg shadow-lg hidden object-cover" autoplay muted playsinline></video>
-            
             <div id="loader" class="text-white text-center absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 z-10">
                 <svg class="animate-spin h-10 w-10 text-pink-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -28,53 +27,68 @@
 
         <!-- ฝั่งขวา: พื้นที่จัดการข้อมูล -->
         <div class="w-full md:w-1/2 p-8 flex flex-col">
-            
-            <!-- ปุ่มสลับโหมด (Tabs) -->
+            <!-- ปุ่มสลับโหมด -->
             <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
-                <button id="tabStudent" class="flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition">
-                    👨‍🎓 โหมดนักเรียน (เช็คอิน)
-                </button>
-                <button id="tabAdmin" class="flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition">
-                    ⚙️ โหมด Admin (ลงทะเบียน)
-                </button>
+                <button id="tabStudent" class="flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition">👨‍🎓 นักเรียน (เช็คอิน)</button>
+                <button id="tabAdmin" class="flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition">⚙️ Admin (ลงทะเบียน)</button>
             </div>
 
             <!-- ============================== -->
-            <!-- 1. ฟอร์มสำหรับนักเรียน (Student) -->
+            <!-- ฟอร์มสำหรับนักเรียน (Student) -->
             <!-- ============================== -->
-            <div id="formStudent" class="flex-1 flex flex-col justify-center space-y-4">
-                <h2 class="text-2xl font-bold text-blue-600 text-center">เช็คอินเข้าเรียน</h2>
-                <p class="text-center text-gray-500 text-sm mb-2">สแกนใบหน้าและบอกเราหน่อยว่าวันนี้คุณรู้สึกอย่างไร</p>
+            <div id="formStudent" class="flex-1 flex flex-col justify-center">
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">วันนี้นักเรียนรู้สึกอย่างไรบ้าง? 💬</label>
-                    <textarea id="studentFeeling" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition resize-none" placeholder="เช่น วันนี้รู้สึกสดชื่นพร้อมเรียนมากครับ หรือ ช่วงนี้เครียดเรื่องสอบจัง..."></textarea>
+                <!-- Step 1: ปุ่มสแกน -->
+                <div id="studentStep1" class="space-y-4 text-center">
+                    <h2 class="text-2xl font-bold text-blue-600">เช็คอินเข้าเรียน</h2>
+                    <p class="text-gray-500 text-sm mb-4">มองกล้องให้ชัดเจน แล้วกดปุ่มสแกนใบหน้า</p>
+                    <button id="btnScanFace" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition transform hover:-translate-y-1 text-lg">
+                        📸 สแกนใบหน้า
+                    </button>
                 </div>
-                
-                <button id="btnCheckIn" class="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
-                    📸 สแกนใบหน้า & ส่งความรู้สึก
-                </button>
+
+                <!-- Step 2: ยืนยันข้อมูลตัวตน -->
+                <div id="studentStep2" class="hidden space-y-4">
+                    <h2 class="text-xl font-bold text-green-600 text-center">✅ พบข้อมูลนักเรียน</h2>
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-gray-700">
+                        <p><span class="font-semibold text-blue-800">รหัส:</span> <span id="foundId"></span></p>
+                        <p><span class="font-semibold text-blue-800">ชื่อ:</span> <span id="foundName"></span></p>
+                        <p><span class="font-semibold text-blue-800">ห้อง:</span> <span id="foundClass"></span></p>
+                        <p><span class="font-semibold text-blue-800">ครูที่ปรึกษา:</span> <span id="foundAdvisor"></span></p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button id="btnCancel" class="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-lg transition">ไม่ใช่ฉัน</button>
+                        <button id="btnConfirm" class="w-2/3 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg shadow-md transition">ยืนยันข้อมูล</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: กรอกความรู้สึก -->
+                <div id="studentStep3" class="hidden space-y-4">
+                    <h2 class="text-xl font-bold text-blue-600">สวัสดี <span id="displayName" class="text-pink-500"></span></h2>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">วันนี้คุณรู้สึกอย่างไรบ้าง? 💬</label>
+                        <textarea id="studentFeeling" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none resize-none" placeholder="เช่น วันนี้รู้สึกสดชื่น หรือ ช่วงนี้เครียดเรื่องสอบ..."></textarea>
+                    </div>
+                    <button id="btnSubmitFeeling" class="w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 rounded-lg shadow-md transition">
+                        🚀 ส่งความรู้สึก
+                    </button>
+                </div>
+
             </div>
 
             <!-- ============================== -->
-            <!-- 2. ฟอร์มสำหรับ Admin (ลงทะเบียน) -->
+            <!-- ฟอร์มสำหรับ Admin (ลงทะเบียน) -->
             <!-- ============================== -->
             <div id="formAdmin" class="hidden flex-1 flex flex-col justify-center space-y-4">
-                <h2 class="text-2xl font-bold text-pink-600 text-center">ลงทะเบียนใบหน้า</h2>
-                
-                <div>
-                    <input type="text" id="admin_student_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="รหัสนักเรียน (เช่น 6901)">
-                </div>
-                <div>
-                    <input type="text" id="admin_name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ชื่อ-สกุล">
-                </div>
+                <h2 class="text-2xl font-bold text-pink-600 text-center">ลงทะเบียนใบหน้าใหม่</h2>
+                <div><input type="text" id="admin_student_id" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="รหัสนักเรียน (เช่น 6901)"></div>
+                <div><input type="text" id="admin_name" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ชื่อ-สกุล"></div>
                 <div class="grid grid-cols-2 gap-4">
                     <input type="text" id="admin_classroom" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ห้องเรียน">
                     <input type="text" id="admin_advisor" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-400 outline-none" placeholder="ครูที่ปรึกษา">
                 </div>
-                
-                <button id="btnRegister" class="w-full mt-4 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
-                    ✨ บันทึกข้อมูลเข้าฐานข้อมูล
+                <button id="btnRegister" class="w-full mt-4 bg-gradient-to-r from-pink-500 to-pink-600 text-white font-bold py-3 px-4 rounded-lg shadow-md">
+                    ✨ บันทึกใบหน้าลงระบบ
                 </button>
             </div>
 
@@ -82,58 +96,76 @@
     </div>
 
     <script>
-        // --- การจัดการ UI สลับโหมด ---
-        const tabStudent = document.getElementById('tabStudent');
-        const tabAdmin = document.getElementById('tabAdmin');
-        const formStudent = document.getElementById('formStudent');
-        const formAdmin = document.getElementById('formAdmin');
+        // 🚨 1. นำลิงก์ Web App URL ของคุณมาวางตรงนี้
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXz87dL0hHBBkWFvKVI8IJPu9Lnew9L8UDsiVoOD2XeCHmBuFCDZZVVnUf3D8h8WfCqg/exec';
+        
+        // 🚨 2. นำลิงก์ Webhook ของ n8n มาวางตรงนี้
+        const N8N_WEBHOOK_URL = 'ใส่_ลิงก์_Webhook_ของ_n8n_ตรงนี้';
 
-        tabStudent.addEventListener('click', () => {
-            // สลับปุ่ม
-            tabStudent.classList.replace('text-gray-500', 'text-blue-600');
-            tabStudent.classList.replace('hover:text-gray-700', 'shadow');
-            tabStudent.classList.add('bg-white');
-            
-            tabAdmin.classList.replace('text-blue-600', 'text-gray-500');
-            tabAdmin.classList.replace('shadow', 'hover:text-gray-700');
-            tabAdmin.classList.remove('bg-white');
+        let faceMatcher = null; // ตัวเก็บข้อมูล AI สำหรับเทียบใบหน้า
+        let currentStudentData = null; // เก็บข้อมูลนักเรียนที่สแกนเจอชั่วคราว
 
-            // สลับฟอร์ม
-            formStudent.classList.remove('hidden');
-            formAdmin.classList.add('hidden');
-        });
-
-        tabAdmin.addEventListener('click', () => {
-            // สลับปุ่ม
-            tabAdmin.classList.replace('text-gray-500', 'text-blue-600');
-            tabAdmin.classList.replace('hover:text-gray-700', 'shadow');
-            tabAdmin.classList.add('bg-white');
-            
-            tabStudent.classList.replace('text-blue-600', 'text-gray-500');
-            tabStudent.classList.replace('shadow', 'hover:text-gray-700');
-            tabStudent.classList.remove('bg-white');
-
-            // สลับฟอร์ม
-            formAdmin.classList.remove('hidden');
-            formStudent.classList.add('hidden');
-        });
-
-        // --- ระบบกล้องและ AI (คงเดิม) ---
         const video = document.getElementById('video');
         const loader = document.getElementById('loader');
         const statusText = document.getElementById('statusText');
 
+        // การสลับโหมด (Tab)
+        document.getElementById('tabStudent').addEventListener('click', () => {
+            document.getElementById('formStudent').classList.remove('hidden');
+            document.getElementById('formAdmin').classList.add('hidden');
+            document.getElementById('tabStudent').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition";
+            document.getElementById('tabAdmin').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition";
+            resetStudentSteps();
+        });
+        document.getElementById('tabAdmin').addEventListener('click', () => {
+            document.getElementById('formAdmin').classList.remove('hidden');
+            document.getElementById('formStudent').classList.add('hidden');
+            document.getElementById('tabAdmin').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold shadow bg-white text-blue-600 transition";
+            document.getElementById('tabStudent').className = "flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition";
+        });
+
+        function showLoader(show, text = "") {
+            loader.style.display = show ? 'flex' : 'none';
+            if(text) statusText.innerText = text;
+        }
+
+        function resetStudentSteps() {
+            document.getElementById('studentStep1').classList.remove('hidden');
+            document.getElementById('studentStep2').classList.add('hidden');
+            document.getElementById('studentStep3').classList.add('hidden');
+            document.getElementById('studentFeeling').value = '';
+            currentStudentData = null;
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                // 1. โหลดโมเดล AI
                 const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
                 await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
                 await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
                 await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
 
-                loader.style.display = 'none';
+                // 2. ดึงฐานข้อมูลนักเรียนจาก Google Sheets เพื่อเตรียมเปรียบเทียบ
+                statusText.innerText = "กำลังซิงค์ฐานข้อมูลนักเรียน...";
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+
+                if(result.status === "success" && result.data.length > 0) {
+                    const labeledDescriptors = result.data.map(student => {
+                        return new faceapi.LabeledFaceDescriptors(
+                            JSON.stringify(student), // เก็บข้อมูลเป็น JSON ผูกไว้กับใบหน้า
+                            [new Float32Array(student.face_descriptor)]
+                        );
+                    });
+                    // สร้างระบบเปรียบเทียบ (ความแม่นยำ 0.5 ยิ่งน้อยยิ่งเข้มงวด)
+                    faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.5);
+                }
+
+                showLoader(false);
                 startCamera();
             } catch (error) {
-                alert("โหลด AI ไม่สำเร็จ โปรดตรวจสอบเน็ต");
+                alert("เกิดข้อผิดพลาดในการเริ่มต้นระบบ (เช็คอินเทอร์เน็ต)");
+                console.error(error);
             }
         });
 
@@ -147,7 +179,156 @@
             }
         }
 
-        // TODO: เดี๋ยวเราจะมาเขียนโค้ดสำหรับปุ่ม btnCheckIn (นักเรียน) และ btnRegister (Admin) ในขั้นตอนต่อไปครับ
+        // ==========================================
+        // ระบบนักเรียน (สแกน -> ยืนยัน -> ส่งข้อมูล)
+        // ==========================================
+
+        // Step 1: สแกนใบหน้า
+        document.getElementById('btnScanFace').addEventListener('click', async () => {
+            if(!faceMatcher) {
+                alert("ฐานข้อมูลว่างเปล่า กรุณาให้ Admin ลงทะเบียนนักเรียนก่อนครับ");
+                return;
+            }
+
+            showLoader(true, "กำลังค้นหาและเปรียบเทียบใบหน้า...");
+            const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+
+            if(!detections) {
+                showLoader(false);
+                alert("ไม่พบใบหน้า กรุณามองกล้องให้ชัดเจนครับ");
+                return;
+            }
+
+            // นำใบหน้าไปเปรียบเทียบกับฐานข้อมูล
+            const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
+
+            if(bestMatch.label === "unknown") {
+                showLoader(false);
+                alert("ไม่พบข้อมูลของคุณในระบบ กรุณาติดต่อ Admin ครับ");
+                return;
+            }
+
+            // แปลงข้อมูลที่ซ่อนไว้กลับมาใช้งาน
+            currentStudentData = JSON.parse(bestMatch.label);
+            
+            // แสดงข้อมูลใน Step 2
+            document.getElementById('foundId').innerText = currentStudentData.student_id;
+            document.getElementById('foundName').innerText = currentStudentData.name;
+            document.getElementById('foundClass').innerText = currentStudentData.classroom;
+            document.getElementById('foundAdvisor').innerText = currentStudentData.advisor;
+            
+            showLoader(false);
+            
+            // เปลี่ยนหน้าจอไป Step 2
+            document.getElementById('studentStep1').classList.add('hidden');
+            document.getElementById('studentStep2').classList.remove('hidden');
+        });
+
+        // Step 2: ยกเลิก / ยืนยัน
+        document.getElementById('btnCancel').addEventListener('click', resetStudentSteps);
+        
+        document.getElementById('btnConfirm').addEventListener('click', () => {
+            document.getElementById('studentStep2').classList.add('hidden');
+            document.getElementById('studentStep3').classList.remove('hidden');
+            document.getElementById('displayName').innerText = currentStudentData.name;
+        });
+
+        // Step 3: ส่งข้อมูลความรู้สึกไปที่ n8n
+        document.getElementById('btnSubmitFeeling').addEventListener('click', async () => {
+            const feeling = document.getElementById('studentFeeling').value;
+            if(!feeling) {
+                alert("กรุณาพิมพ์ความรู้สึกของวันนี้ก่อนส่งครับ");
+                return;
+            }
+
+            if(N8N_WEBHOOK_URL.includes("ใส่_ลิงก์")) {
+                alert("กำลังจำลองการส่งข้อมูล (เนื่องจากยังไม่ได้ใส่ลิงก์ n8n)\nข้อมูลพร้อมส่งไปประเมินความเสี่ยงแล้วครับ!");
+                resetStudentSteps();
+                return;
+            }
+
+            showLoader(true, "กำลังส่งข้อมูลเข้าสู่ระบบ...");
+
+            const payload = {
+                student_id: currentStudentData.student_id,
+                student_name: currentStudentData.name,
+                classroom: currentStudentData.classroom,
+                advisor: currentStudentData.advisor,
+                feeling: feeling
+            };
+
+            try {
+                // ยิงข้อมูลเข้า n8n Webhook
+                await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                showLoader(false);
+                alert("ส่งข้อมูลเรียบร้อยแล้ว! ขอให้วันนี้เป็นวันที่ดีนะ 🌟");
+                resetStudentSteps(); // กลับไปหน้าแรกเพื่อรอนักเรียนคนถัดไป
+            } catch (err) {
+                showLoader(false);
+                alert("ส่งข้อมูลไม่สำเร็จ กรุณาลองอีกครั้งครับ");
+            }
+        });
+
+        // ==========================================
+        // ระบบ Admin (บันทึกข้อมูล)
+        // ==========================================
+        document.getElementById('btnRegister').addEventListener('click', async () => {
+            const studentId = document.getElementById('admin_student_id').value;
+            const name = document.getElementById('admin_name').value;
+            const classroom = document.getElementById('admin_classroom').value;
+            const advisor = document.getElementById('admin_advisor').value;
+
+            if(!studentId || !name || !classroom || !advisor) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            showLoader(true, "กำลังวิเคราะห์โครงสร้างใบหน้า...");
+            const detections = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+
+            if (!detections) {
+                showLoader(false);
+                alert("ไม่พบใบหน้า! กรุณามองกล้องให้ชัดเจนครับ");
+                return;
+            }
+
+            showLoader(true, "กำลังบันทึกข้อมูล...");
+
+            const payload = {
+                action: "register",
+                student_id: studentId,
+                name: name,
+                classroom: classroom,
+                advisor: advisor,
+                face_descriptor: JSON.stringify(Array.from(detections.descriptor))
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                const result = await response.json();
+                showLoader(false);
+
+                if(result.status === "success") {
+                    alert("✅ บันทึกใบหน้าสำเร็จ! แนะนำให้รีเฟรชหน้าเว็บ 1 ครั้งเพื่อให้ระบบดึงข้อมูลใหม่ไปใช้งาน");
+                    document.querySelectorAll('#formAdmin input').forEach(input => input.value = '');
+                } else {
+                    alert("เกิดข้อผิดพลาด: " + result.message);
+                }
+            } catch (error) {
+                showLoader(false);
+                alert("เชื่อมต่อฐานข้อมูลล้มเหลว");
+            }
+        });
     </script>
 </body>
 </html>
